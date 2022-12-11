@@ -12,29 +12,30 @@
 
 #include "Hash.h"
 
-template <typename T, typename F>
-concept THash = requires(T t) {
-                  {
-                    t(std::declval<F>(), std::declval<size_t>())
-                  } -> std::same_as<size_t>;
-                };
-
 template <typename T, THash<T> THash1 = H1, THash<T> THash2 = H2>
 class DoubleHashing {
  public:
-  explicit DoubleHashing() : _data(std::vector<Bucket*>(_table_size)) {}
+  DoubleHashing() : _data(std::vector<Bucket*>(_table_size)) {}
+
+  ~DoubleHashing() {
+    for (size_t i = 0; i < _table_size; ++i) {
+      if (_data[i] != nullptr) {
+        delete _data[i];
+      }
+    }
+  }
 
   void resize() {
     size_t old_size = _table_size;
     _table_size *= 2;
     _size = 0;
     _all_size = 0;
-    std::vector<Bucket*> new_data(_table_size);
-    std::swap(_data, new_data);
+    std::vector<Bucket*> t_data(_table_size);
+    std::swap(_data, t_data);
     for (size_t i = 0; i < old_size; ++i) {
-      if (new_data[i] != nullptr && new_data[i]->enabled) {
-        insert(new_data[i]->value);
-        delete new_data[i];
+      if (t_data[i] != nullptr && t_data[i]->enabled) {
+        insert(t_data[i]->value);
+        delete t_data[i];
       }
     }
   }
@@ -42,12 +43,12 @@ class DoubleHashing {
   void rehash() {
     _all_size = 0;
     _size = 0;
-    std::vector<Bucket*> new_data(_table_size);
-    std::swap(_data, new_data);
+    std::vector<Bucket*> t_data(_table_size);
+    std::swap(_data, t_data);
     for (size_t i = 0; i < _table_size; ++i) {
-      if (new_data[i] && new_data[i]->enabled) {
-        insert(new_data[i]->value);
-        delete new_data[i];
+      if (t_data[i] && t_data[i]->enabled) {
+        insert(t_data[i]->value);
+        delete t_data[i];
       }
     }
   }
@@ -113,8 +114,7 @@ class DoubleHashing {
 
   void print() {
     std::cout << "---------------\n";
-    std::cout << "Size: " << _size << ", all size: " << _all_size
-              << ", table size: " << _table_size << '\n';
+    printSize();
     for (size_t i = 0; i < _table_size; ++i) {
       if (_data[i] != nullptr) {
         std::cout << "Index: " << i << ", Value: " << _data[i]->value
@@ -122,6 +122,11 @@ class DoubleHashing {
       }
     }
     std::cout << "---------------\n";
+  }
+
+  void printSize() {
+    std::cout << "Size: " << _size << ", all size: " << _all_size
+              << ", table size: " << _table_size << '\n';
   }
 
  private:
