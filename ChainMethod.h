@@ -40,9 +40,7 @@ class ChainMethod {
       if (t_data[i] == nullptr) {
         continue;
       }
-      ++_bucket_size;
-      for (auto* bucket = t_data[i]; bucket != nullptr;
-           ++_size, bucket = bucket->next) {
+      for (auto* bucket = t_data[i]; bucket != nullptr; bucket = bucket->next) {
         insert(bucket->value);
       }
     }
@@ -89,6 +87,9 @@ class ChainMethod {
   }
 
   bool insert(const T& element) {
+    if (_size + 1 > static_cast<size_t>(kRehashSize * _table_size)) {
+      resize();
+    }
     size_t h = _t_hash(element, _table_size);
     if (_data[h] == nullptr) {
       _data[h] = new Bucket(element);
