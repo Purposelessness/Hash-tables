@@ -4,7 +4,7 @@
 #ifndef HASH_TABLES_DOUBLEHASHING_H_
 #define HASH_TABLES_DOUBLEHASHING_H_
 
-#define DEBUG
+//#define DEBUG
 
 #include <iostream>
 #include <string>
