@@ -8,7 +8,7 @@
 
 #include "Hash.h"
 
-template <typename T, THash<T> THash = H>
+template <typename T, THash<T> THash = H1>
 class ChainMethod {
  public:
   ChainMethod() : _data(std::vector<Bucket*>(_table_size)) {}
