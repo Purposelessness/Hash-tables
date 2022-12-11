@@ -80,6 +80,7 @@ class DoubleHashing {
       }
       h1 = (h1 + h2) % _table_size;
     }
+    return false;
   }
 
   bool insert(const T& element) {
@@ -138,7 +139,7 @@ class DoubleHashing {
   };
 
   static constexpr size_t kDefaultSize = 8;
-  static constexpr double kRehashSize = 0.75;
+  static constexpr double kRehashSize = 0.7;
 
   size_t _size = 0;
   size_t _all_size = 0;

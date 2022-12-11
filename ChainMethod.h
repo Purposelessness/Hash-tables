@@ -141,7 +141,7 @@ class ChainMethod {
   };
 
   static constexpr size_t kDefaultSize = 8;
-  static constexpr double kRehashSize = 0.75;
+  static constexpr double kRehashSize = 0.7;
 
   size_t _bucket_size = 0;
   size_t _size = 0;
