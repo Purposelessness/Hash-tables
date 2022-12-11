@@ -1,13 +1,10 @@
 #include <iostream>
 
+#include "ChainMethod.h"
 #include "DoubleHashing.h"
 
 int main() {
-  DoubleHashing<std::string> set;
-  set.print();
-  set.insert("aboba");
-  set.insert("aboba");
-  set.print();
-  std::cout << set.contains("aboba");
+
+
   return 0;
 }
