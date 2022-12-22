@@ -4,8 +4,6 @@
 #ifndef HASH_TABLES_DOUBLEHASHING_H_
 #define HASH_TABLES_DOUBLEHASHING_H_
 
-// #define DEBUG
-
 #include <iostream>
 #include <string>
 #include <vector>
@@ -14,8 +12,12 @@
 
 template <typename T, THash<T> THash1 = H1, THash<T> THash2 = H2>
 class DoubleHashing {
+  static constexpr size_t kDefaultSize = 8;
+  static constexpr double kRehashSize = 0.7;
+
  public:
-  DoubleHashing() : _data(std::vector<Bucket*>(_table_size)) {}
+  explicit DoubleHashing(size_t table_size = kDefaultSize)
+      : _table_size(table_size), _data(std::vector<Bucket*>(_table_size)) {}
 
   ~DoubleHashing() {
     for (size_t i = 0; i < _table_size; ++i) {
@@ -53,37 +55,39 @@ class DoubleHashing {
     }
   }
 
-  bool contains(const T& element) {
+  std::pair<bool, size_t> contains(const T& element) {
     size_t h1 = _t_hash_1(element, _table_size);
     size_t h2 = _t_hash_2(element, _table_size);
-#ifdef DEBUG
-    std::cout << "Contains '" << element << "'\n\th1: " << h1 << ", h2: " << h2
-              << '\n';
-#endif
-    for (size_t i = 0; i < _table_size && _data[h1] != nullptr; ++i) {
+    size_t i = 0;
+    for (; i < _table_size && _data[h1] != nullptr; ++i) {
       if (_data[h1]->enabled && _data[h1]->value == element) {
-        return true;
+        std::pair<bool, size_t> out{true, i + 1};
+        return out;
       }
       h1 = (h1 + h2) % _table_size;
     }
-    return false;
+    std::pair<bool, size_t> out{false, i + 1};
+    return out;
   }
 
-  bool erase(const T& element) {
+  std::pair<bool, size_t> erase(const T& element) {
     size_t h1 = _t_hash_1(element, _table_size);
     size_t h2 = _t_hash_2(element, _table_size);
-    for (size_t i = 0; i < _table_size && _data[h1] != nullptr; ++i) {
+    size_t i = 0;
+    for (; i < _table_size && _data[h1] != nullptr; ++i) {
       if (_data[h1]->enabled && _data[h1]->value == element) {
         _data[h1]->enabled = false;
         --_size;
-        return true;
+        std::pair<bool, size_t> out{true, i + 1};
+        return out;
       }
       h1 = (h1 + h2) % _table_size;
     }
-    return false;
+    std::pair<bool, size_t> out{false, i + 1};
+    return out;
   }
 
-  bool insert(const T& element) {
+  std::pair<bool, size_t> insert(const T& element) {
     if (_size + 1 > static_cast<size_t>(kRehashSize * _table_size)) {
       resize();
     } else if (_all_size > 2 * _size) {
@@ -91,26 +95,26 @@ class DoubleHashing {
     }
     size_t h1 = _t_hash_1(element, _table_size);
     size_t h2 = _t_hash_2(element, _table_size);
-#ifdef DEBUG
-    std::cout << "Insert '" << element << "'\n\th1: " << h1 << ", h2: " << h2
-              << '\n';
-#endif
-    for (size_t i = 0; i < _table_size && _data[h1] != nullptr; ++i) {
+    size_t i = 0;
+    for (; i < _table_size && _data[h1] != nullptr; ++i) {
       if (_data[h1]->enabled && _data[h1]->value == element) {
-        return false;
+        std::pair<bool, size_t> out{false, i + 1};
+        return out;
       }
       if (!_data[h1]->enabled) {
         _data[h1]->value = element;
         _data[h1]->enabled = true;
         ++_size;
-        return true;
+        std::pair<bool, size_t> out{true, i + 1};
+        return out;
       }
       h1 = (h1 + h2) % _table_size;
     }
     _data[h1] = new Bucket(element);
     ++_all_size;
     ++_size;
-    return true;
+    std::pair<bool, size_t> out{true, i + 1};
+    return out;
   }
 
   void print() {
@@ -137,9 +141,6 @@ class DoubleHashing {
 
     explicit Bucket(const T& value) : value(value) {}
   };
-
-  static constexpr size_t kDefaultSize = 8;
-  static constexpr double kRehashSize = 0.7;
 
   size_t _size = 0;
   size_t _all_size = 0;

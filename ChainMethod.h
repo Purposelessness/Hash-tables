@@ -10,8 +10,12 @@
 
 template <typename T, THash<T> THash = H1>
 class ChainMethod {
+  static constexpr size_t kDefaultSize = 8;
+  static constexpr double kRehashSize = 0.7;
+
  public:
-  ChainMethod() : _data(std::vector<Bucket*>(_table_size)) {}
+  explicit ChainMethod(size_t table_size = kDefaultSize)
+      : _table_size(table_size), _data(std::vector<Bucket*>(_table_size)) {}
 
   ~ChainMethod() {
     for (size_t i = 0; i < _table_size; ++i) {
@@ -46,23 +50,29 @@ class ChainMethod {
     }
   }
 
-  bool contains(const T& element) {
+  std::pair<bool, size_t> contains(const T& element) {
     size_t h = _t_hash(element, _table_size);
     if (_data[h] == nullptr) {
-      return false;
+      std::pair<bool, size_t> out{false, 1};
+      return out;
     }
-    for (auto* bucket = _data[h]; bucket != nullptr; bucket = bucket->next) {
+    size_t i = 0;
+    for (auto* bucket = _data[h]; bucket != nullptr;
+         bucket = bucket->next, ++i) {
       if (bucket->value == element) {
-        return true;
+        std::pair<bool, size_t> out{true, i + 1};
+        return out;
       }
     }
-    return false;
+    std::pair<bool, size_t> out{false, i + 1};
+    return out;
   }
 
-  bool erase(const T& element) {
+  std::pair<bool, size_t> erase(const T& element) {
     size_t h = _t_hash(element, _table_size);
     if (_data[h] == nullptr) {
-      return false;
+      std::pair<bool, size_t> out{false, 1};
+      return out;
     }
     auto* bucket = _data[h];
     if (bucket->value == element) {
@@ -72,21 +82,25 @@ class ChainMethod {
       --_size;
       _data[h] = bucket->next;
       delete bucket;
-      return true;
+      std::pair<bool, size_t> out{true, 1};
+      return out;
     }
-    for (; bucket->next != nullptr; bucket = bucket->next) {
+    size_t i = 0;
+    for (; bucket->next != nullptr; bucket = bucket->next, ++i) {
       if (bucket->next->value == element) {
         --_size;
         auto* tmp = bucket->next;
         bucket->next = bucket->next->next;
         delete tmp;
-        return true;
+        std::pair<bool, size_t> out{true, i + 1};
+        return out;
       }
     }
-    return false;
+    std::pair<bool, size_t> out{false, i + 1};
+    return out;
   }
 
-  bool insert(const T& element) {
+  std::pair<bool, size_t> insert(const T& element) {
     if (_size + 1 > static_cast<size_t>(kRehashSize * _table_size)) {
       resize();
     }
@@ -95,12 +109,15 @@ class ChainMethod {
       _data[h] = new Bucket(element);
       ++_bucket_size;
       ++_size;
-      return true;
+      std::pair<bool, size_t> out{true, 1};
+      return out;
     }
     auto* bucket = _data[h];
-    for (;; bucket = bucket->next) {
+    size_t i = 0;
+    for (;; bucket = bucket->next, ++i) {
       if (bucket->value == element) {
-        return false;
+        std::pair<bool, size_t> out{false, i + 1};
+        return out;
       }
       if (bucket->next == nullptr) {
         break;
@@ -108,7 +125,8 @@ class ChainMethod {
     }
     bucket->next = new Bucket(element);
     ++_size;
-    return true;
+    std::pair<bool, size_t> out{true, i + 1};
+    return out;
   }
 
   void print() {
@@ -139,9 +157,6 @@ class ChainMethod {
 
     explicit Bucket(const T& value) : value(value) {}
   };
-
-  static constexpr size_t kDefaultSize = 8;
-  static constexpr double kRehashSize = 0.7;
 
   size_t _bucket_size = 0;
   size_t _size = 0;
