@@ -7,5 +7,5 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 aux_source_directory(. src)
 
-add_executable(hash_tables ${src} DoubleHashing.h ChainMethod.h Hash.cpp Hash.h)
+add_executable(hash_tables ${src} DoubleHashing.h ChainMethod.h Hash.cpp Hash.h Test.cpp Test.h)
 # target_compile_features(program PRIVATE cxx_std_20)
