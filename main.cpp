@@ -67,7 +67,7 @@ void testFile(const std::string& filename, const std::string& out_filename) {
        << test.double_hashing_test.insertion_test.max_iterations << '\t'
        << test.chain_method_test.insertion_test.max_iterations << '\n';
     out_insert_file << ss.str();
-    ss.clear();
+    ss.str(std::string{});
     ss << test.table_size << '\t'
        << test.double_hashing_test.erasing_test.time << '\t'
        << test.chain_method_test.erasing_test.time << '\t'
@@ -76,7 +76,7 @@ void testFile(const std::string& filename, const std::string& out_filename) {
        << test.double_hashing_test.erasing_test.max_iterations << '\t'
        << test.chain_method_test.erasing_test.max_iterations << '\n';
     out_erase_file << ss.str();
-    ss.clear();
+    ss.str(std::string{});
     ss << test.table_size << '\t'
        << test.double_hashing_test.contains_test.time << '\t'
        << test.chain_method_test.contains_test.time << '\t'
@@ -85,7 +85,7 @@ void testFile(const std::string& filename, const std::string& out_filename) {
        << test.double_hashing_test.contains_test.max_iterations << '\t'
        << test.chain_method_test.contains_test.max_iterations << '\n';
     out_contains_file << ss.str();
-    ss.clear();
+    ss.str(std::string{});
   }
 }
 
